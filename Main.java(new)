@@ -1,0 +1,195 @@
+public class Main {
+    public static void main(String[] args) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("test")) {
+            testEndingRoutes();
+        } else {
+            runGame();
+        }
+    }
+
+    public static void runGame() {
+        try (Scanner input = new Scanner(System.in)) {
+            System.out.print("Masukkan nama karakter kamu: ");
+            String name = input.nextLine();
+
+            Character player = new Character(name, 100);
+
+            // === ENDINGS ===
+            Scene goodEnding = new Scene(   
+                "Kamu berhasil keluar dari kota dan diselamatkan militer. Kamu selamat!",
+                "-", null, 0, 10,
+                "-", null, 0, 0,
+                "-", null, 0, 0
+            );
+
+            Scene badEnding = new Scene(
+                "Kamu gagal keluar. Virus menyebar ke tubuhmu. Ini adalah akhir dari segalanya.",
+                "-", null, 0, -10,
+                "-", null, 0, 0,
+                "-", null, 0, 0
+            );
+
+            Scene secretEnding = new Scene(
+                "Militer menerima data antivirus darimu. Dunia diselamatkan karena usahamu. Kamu menjadi ikon perlawanan dan pahlawan dunia!",
+                "-", null, 0, 20,
+                "-", null, 0, 0,
+                "-", null, 0, 0
+            );
+
+            // === SCENES ===
+            Scene scene9A = new Scene(
+                "Kamu memanjat tembok dan melihat helikopter militer.",
+                "Serahkan data antivirus", null, 0, 0,  
+                "Lari ke arah hutan", badEnding, 10, -5,
+                "Tunggu di luar pagar", badEnding, 5, 0
+            );
+
+            Scene scene9B = new Scene(
+                "Gerbang dijaga zombie. Kamu harus cepat!",
+                "Lempar batu ke arah mereka", badEnding, 15, -5,
+                "Jalan pelan-pelan lewat samping", goodEnding, 0, 5,
+                "Bunuh satu-satu", badEnding, 25, -10
+            );
+
+            Scene scene8 = new Scene(
+                "Kamu melihat tembok besar kota dan dua jalur.",
+                "Panjat tembok langsung", scene9A, 10, 0,
+                "Cari gerbang kota", scene9B, 0, 5,
+                "Sembunyi menunggu malam", badEnding, 0, -5
+            );
+
+            Scene scene7 = new Scene(
+                "Lab percobaan penuh dengan zombie terikat dan komputer yang menyala.",
+                "Ambil antivirus (secret item)", scene8, 0, 5,
+                "Hancurkan semuanya", scene8, 0, 0,
+                "Kabur sebelum ketahuan", scene8, 0, 0
+            );
+
+            Scene scene6 = new Scene(
+                "Profesor eksperimen mencoba meyakinkanmu.",
+                "Percaya dan ikuti", scene7, 0, 5,
+                "Tangkap dia dan bawa keluar", scene7, 5, 5,
+                "Bunuh dia langsung", badEnding, 0, -10
+            );
+
+            Scene scene5 = new Scene(
+                "Zombie menghadang jalan keluar!",
+                "Lawan mereka", scene6, 20, -5,
+                "Lari ke jalan belakang", scene6, 10, 0,
+                "Sembunyi di gedung tinggi", scene6, 5, 0
+            );
+
+            Scene scene4 = new Scene(
+                "Toko obat rusak. Kamu temukan medkit.",
+                "Ambil medkit", scene5, 0, 0,
+                "Tinggalkan tempat", scene5, 0, 0,
+                "Cari alat lain", scene5, 0, 5
+            );
+
+            Scene scene3 = new Scene(
+                "Seorang survivor gila menyerangmu!",
+                "Lawan", scene4, 10, -5,
+                "Kabur", scene4, 0, 0,
+                "Coba tenangkan dia", scene4, 0, 5
+            );
+
+            Scene scene2A = new Scene(
+                "Lorong gelap mengarah ke ruang terkunci.",
+                "Buka paksa pintu", scene3, 10, -5,
+                "Cari jalan lain", scene3, 0, 5,
+                "Balik ke tempat semula", scene3, 0, 0
+            );
+
+            Scene scene2B = new Scene(
+                "Jalan utama penuh reruntuhan dan bau menyengat.",
+                "Terobos cepat", scene3, 5, 0,
+                "Cek gedung sekitar", scene3, 0, 5,
+                "Panggil siapa saja", badEnding, 10, -5
+            );
+
+            Scene scene1 = new Scene(
+                "Kamu terbangun di tengah kota yang hancur. Terdengar jeritan dan suara aneh.",
+                "Masuk lorong gelap", scene2A, 0, 5,
+                "Jalan ke arah terbuka", scene2B, 0, 0,
+                "Naik ke atap gedung", badEnding, 20, -10
+            );
+
+            Story story = new Story(scene1, player) {
+                @Override
+                public void play() {
+                    Scene currentScene = startScene;
+
+                    while (currentScene != null) {
+                        currentScene.displayScene();
+
+                        System.out.print("\nKetik pilihan (A/B/C) atau 'INFO' untuk cek status: ");
+                        String input = scanner.nextLine();
+
+                        if (input.equalsIgnoreCase("INFO")) {
+                            System.out.println("\n--- STATUS KARAKTER ---");
+                            System.out.println("Nama: " + player.getName());
+                            System.out.println("HP: " + player.getHealth());
+                            System.out.println("XP: " + player.getXP());
+                            System.out.println("Item: " + player.getItem());
+                            continue;
+                        }
+
+                        Scene nextScene;
+                        if (currentScene == scene9A && input.equalsIgnoreCase("A")) {
+                            if ("antivirus".equalsIgnoreCase(player.getItem())) {
+                                nextScene = secretEnding;
+                                System.out.println("🧬 Kamu menyerahkan antivirus ke militer!");
+                            } else {
+                                nextScene = goodEnding;
+                                System.out.println("Kamu tidak membawa antivirus, tapi berhasil selamat.");
+                            }
+                        } else {
+                            nextScene = currentScene.makeChoice(input, player);
+                        }
+
+                        if (nextScene == null) {
+                            System.out.println("Input tidak valid. Coba lagi.");
+                        } else {
+                            currentScene = nextScene;
+                            if (currentScene.isEndScene()) {
+                                currentScene.displayScene();
+                                System.out.println("\nPermainan selesai.");
+                                System.out.println("Final HP: " + player.getHealth() + ", XP: " + player.getXP());
+                                break;
+                            }
+                        }
+                    }
+
+                    scanner.close();
+                }
+            };
+
+            story.start();
+        }
+    }
+
+    public static void testEndingRoutes() {
+        Character player = new Character("Tester", 100);
+        player.setItem("antivirus");
+
+        Scene secretEnding = new Scene(
+            "Kamu menjadi pahlawan berkat antivirus!",
+            "-", null, 0, 20,
+            "-", null, 0, 0,
+            "-", null, 0, 0
+        );
+
+        Scene goodEnding = new Scene(
+            "Kamu selamat, tapi dunia tetap kacau.",
+            "-", null, 0, 10,
+            "-", null, 0, 0,
+            "-", null, 0, 0
+        );
+
+        Scene nextScene = player.getItem().equalsIgnoreCase("antivirus") ? secretEnding : goodEnding;
+
+        System.out.println("\n=== TEST ENDING ROUTE ===");
+        nextScene.displayScene();
+        System.out.println("XP: " + player.getXP());
+    }
+}

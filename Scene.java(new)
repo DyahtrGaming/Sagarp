@@ -1,0 +1,125 @@
+import java.util.Scanner;
+
+public class Scene {
+    private String description;
+    private String choiceA;
+    private String choiceB;
+    private String choiceC;
+
+    private Scene nextSceneA;
+    private Scene nextSceneB;
+    private Scene nextSceneC;
+
+    private int damageA, damageB, damageC;
+    private int xpA, xpB, xpC;
+
+    public Scene(String description,
+                 String choiceA, Scene nextSceneA, int damageA, int xpA,
+                 String choiceB, Scene nextSceneB, int damageB, int xpB,
+                 String choiceC, Scene nextSceneC, int damageC, int xpC) {
+        this.description = description;
+        this.choiceA = choiceA;
+        this.nextSceneA = nextSceneA;
+        this.damageA = damageA;
+        this.xpA = xpA;
+
+        this.choiceB = choiceB;
+        this.nextSceneB = nextSceneB;
+        this.damageB = damageB;
+        this.xpB = xpB;
+
+        this.choiceC = choiceC;
+        this.nextSceneC = nextSceneC;
+        this.damageC = damageC;
+        this.xpC = xpC;
+    }
+
+    public void displayScene() {
+        System.out.println("\n=== SITUASI ===");
+        System.out.println(description);
+        System.out.println("Pilihanmu:");
+        System.out.println("A. " + choiceA);
+        System.out.println("B. " + choiceB);
+        System.out.println("C. " + choiceC);
+    }
+
+    public Scene makeChoice(String choice, Character player) {
+        switch (choice.toUpperCase()) {
+            case "A":
+                player.takeDamage(damageA);
+                if (xpA >= 0) player.addXP(xpA);
+                else player.reduceXP(Math.abs(xpA));
+
+                checkItemEffect(choiceA, player);
+                return nextSceneA;
+
+            case "B":
+                player.takeDamage(damageB);
+                if (xpB >= 0) player.addXP(xpB);
+                else player.reduceXP(Math.abs(xpB));
+
+                checkItemEffect(choiceB, player);
+                return nextSceneB;
+
+            case "C":
+                player.takeDamage(damageC);
+                if (xpC >= 0) player.addXP(xpC);
+                else player.reduceXP(Math.abs(xpC));
+
+                checkItemEffect(choiceC, player);
+                return nextSceneC;
+
+            default:
+                System.out.println("Pilihan tidak valid.");
+                return null;
+        }
+    }
+
+    private void checkItemEffect(String choice, Character player) {
+        String lower = choice.toLowerCase();
+        if (lower.contains("medkit")) {
+            player.heal(5);
+            player.setItem("medkit");
+            System.out.println(" Kamu menggunakan medkit! HP bertambah 5%.");
+        } else if (lower.contains("antivirus")) {
+            player.setItem("antivirus");
+            System.out.println("Kamu menemukan antivirus rahasia!");
+        }
+    }
+
+    public boolean isEndScene() {
+        return nextSceneA == null && nextSceneB == null && nextSceneC == null;
+    }
+
+    public static void main(String[] args) {
+        Character testChar = new Character("Tester", 100);
+
+        Scene endScene = new Scene(
+            "Ending scene testing.",
+            "-", null, 0, 0,
+            "-", null, 0, 0,
+            "-", null, 0, 0
+        );
+
+        Scene testScene = new Scene(
+            "Kamu menemukan medkit dan antivirus. Pilih tindakan:",
+            "Ambil medkit", endScene, 0, 0,
+            "Ambil antivirus", endScene, 0, 5,
+            "Abaikan semua", endScene, 0, 0
+        );
+
+        Scanner scanner = new Scanner(System.in);
+        testScene.displayScene();
+        System.out.print("Pilih A/B/C: ");
+        String choice = scanner.nextLine();
+
+        Scene result = testScene.makeChoice(choice, testChar);
+
+        System.out.println("\n=== STATUS AKHIR ===");
+        System.out.println("Nama: " + testChar.getName());
+        System.out.println("HP: " + testChar.getHealth());
+        System.out.println("XP: " + testChar.getXP());
+        System.out.println("Item: " + testChar.getItem());
+        scanner.close();
+    }
+}
